@@ -1,0 +1,123 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "srvcs-ceil",
+    "description": "",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [],
+        "summary": "`GET /` — service identity (srvcs service standard).",
+        "operationId": "index",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Info"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [],
+        "summary": "`POST /` — round `value` up to the nearest integer (toward +infinity).",
+        "description": "Input validation is delegated to `srvcs-isnumber` over HTTP (the single\nsource of truth for \"is this a number\"). If that dependency is unreachable,\nthis service reports itself degraded rather than guessing. Unlike parity\nservices, `ceil` accepts fractional floats — rounding them is the whole job.",
+        "operationId": "evaluate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "value is not a number"
+          },
+          "500": {
+            "description": "value is numeric but not representable as f64"
+          },
+          "503": {
+            "description": "a dependency is unavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EvalRequest": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "object"
+          }
+        }
+      },
+      "Info": {
+        "type": "object",
+        "required": [
+          "service",
+          "concern",
+          "depends_on"
+        ],
+        "properties": {
+          "concern": {
+            "type": "string"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "service": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultResponse": {
+        "type": "object",
+        "required": [
+          "value",
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "value": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
